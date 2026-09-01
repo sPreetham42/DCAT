@@ -12,14 +12,12 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
 
+  # ruff-format is a black-compatible formatter; black is kept as a dev tool
+  # but NOT as a second pre-commit hook so pre-commit does not re-format files
+  # behind the staged snapshot (which breaks the stash-based flow on Windows).
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.10
     hooks:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
-
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black

@@ -1,0 +1,25 @@
+# @package _global_
+# ─────────────────────────────────────────────────────────────────────────────
+# EXPERIMENT: Early / feature-concatenation fusion baseline.
+#
+# Text and image token sequences are concatenated in the shared latent space
+# BEFORE any interaction, then fed through a joint pooling step. This is a
+# conventional fusion method and a comparison point — NOT a candidate
+# architecture.
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  - /model/dcat.yaml
+  - /model/distilbert.yaml
+  - /model/mobilevit.yaml
+  - /data/dataset.yaml
+  - /training/base.yaml
+  - /router/thresholds.yaml
+  - _self_
+
+experiment_name: early_fusion
+fusions: concat
+model:
+  dcat:
+    cross_attention:
+      layers: 0          # no cross-attention; concat fusion instead

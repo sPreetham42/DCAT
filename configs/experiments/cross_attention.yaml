@@ -1,0 +1,29 @@
+# @package _global_
+# ─────────────────────────────────────────────────────────────────────────────
+# EXPERIMENT: Static cross-attention.
+#
+# Cross-attention is applied unconditionally — even to unimodal inputs. This
+# isolates the interaction effect of cross-attention (H2) from the conditional
+# computation savings (H3), by disabling dynamic routing while keeping
+# cross-modal interaction.
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  - /model/dcat.yaml
+  - /model/distilbert.yaml
+  - /model/mobilevit.yaml
+  - /data/dataset.yaml
+  - /training/base.yaml
+  - /router/thresholds.yaml
+  - _self_
+
+experiment_name: cross_attention
+routing: static            # as opposed to dcat's dynamic / conditional routing
+fusions: cross_attention
+model:
+  dcat:
+    cross_attention:
+      layers: 2
+      heads: 4
+      d_model: 256
+      d_ff: 1024

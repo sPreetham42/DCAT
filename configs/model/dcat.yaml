@@ -1,0 +1,33 @@
+# @package model.dcat
+# ─────────────────────────────────────────────────────────────────────────────
+# DCAT — architecture-level configuration.
+#
+# Holds the knobs that are specific to the conditional cross-attention
+# architecture itself (as opposed to the individual encoders, which live in
+# distilbert.yaml and mobilevit.yaml).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Shared latent dimension for both text and vision projections.
+# Candidate experimental values: 128 / 256 / 384 / 512
+shared_dim: 256
+
+# Cross-attention block
+cross_attention:
+  layers: 2
+  heads: 4
+  d_model: 256        # equals shared_dim by default
+  d_ff: 1024
+  dropout: 0.1
+  pre_norm: true      # Pre-LayerNorm (as specified)
+  activation: gelu
+
+# Pooling strategy (mean pooling is the frozen default).
+# `attention` may be introduced later only as an explicit ablation.
+pooling: mean
+
+# Shared classifier head
+classifier:
+  hidden_dim: 128
+  num_layers: 1
+  dropout: 0.3
+  activation: gelu

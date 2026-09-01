@@ -1,0 +1,36 @@
+# @package data
+# ─────────────────────────────────────────────────────────────────────────────
+# Dataset configuration.
+#
+# NOTE: No hardcoded absolute paths. Data locations are provided at runtime
+# via ${oc.env:DATASET_ROOT,...} or overridden on the command line.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Root directory containing raw .eml files.
+raw_dir: ${oc.env:DATASET_RAW_DIR, data/raw}
+
+# Directory for processed / normalized records (Parquet).
+processed_dir: ${oc.env:DATASET_PROCESSED_DIR, data/processed}
+
+# Manifest file mapping emails to labels + splits.
+manifest: ${oc.env:DATASET_MANIFEST, data/manifests/manifest.csv}
+
+# Dataset version tag recorded in MLflow + DVC.
+version: v0
+
+# Split fractions (must sum to 1.0).
+splits:
+  train: 0.7
+  val: 0.15
+  test: 0.15
+
+# Seeding for deterministic split assignment.
+split_seed: 42
+
+# Column mapping for the raw dataset files.
+columns:
+  email_id: email_id
+  label: label
+  path: path
+  sender: sender
+  campaign_id: campaign_id

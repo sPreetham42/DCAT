@@ -1,0 +1,46 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# DCAT — Root Hydra configuration.
+#
+# Composition root. Each sub-config is referenced by path (Hydra resolves it
+# under the `configs/` search path). `_self_` at the END means the root file's
+# own keys take priority over the merged defaults.
+#
+# Everything is overridable on the CLI:
+#     python dcat/train.py model.dcat.shared_dim=384
+#     python dcat/train.py +trainer.strategy=finetune
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Experiment & reproducibility
+seed: 42
+experiment_name: dcat_default
+
+defaults:
+  - model/dcat.yaml
+  - model/distilbert.yaml
+  - model/mobilevit.yaml
+  - data/dataset.yaml
+  - training/base.yaml
+  - router/thresholds.yaml
+  - _self_
+
+# Device / precision
+device: auto            # auto | cpu | cuda
+precision: fp16         # fp32 | fp16 | bf16
+gradient_checkpointing: false
+
+# MLflow
+mlflow:
+  tracking_uri: mlruns
+  experiment_name: ${experiment_name}
+  run_name: null
+
+# Hydra output location
+hydra:
+  run:
+    dir: outputs/${experiment_name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d_%H-%M-%S}
+  job_logging:
+    formatters:
+      simple:
+        format: "[%(asctime)s][%(levelname)s] %(name)s: %(message)s"

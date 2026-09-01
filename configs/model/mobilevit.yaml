@@ -1,0 +1,24 @@
+# @package model.mobilevit
+# ─────────────────────────────────────────────────────────────────────────────
+# Vision encoder — MobileViT from `timm`.
+#
+# We use pre-pooling / intermediate spatial features, NOT the final
+# classification vector. The actual token count is inspected at runtime and
+# never hardcoded.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Model identifier as registered in timm.
+# Expected feature dimension found via model.feature_info / forward_features.
+model_name: mobilevit_s
+
+# Initial image size.
+image_size: [224, 224]        # [height, width]
+
+# Whether to use the model's `forward_features` (pre-pooling spatial features).
+use_spatial_features: true
+
+# Interpolation / contrast settings — modern timm builds use BICUBIC.
+antialias: true
+
+# Freeze this encoder during phase-1 training.
+freeze: true

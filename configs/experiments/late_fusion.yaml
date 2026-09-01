@@ -1,0 +1,24 @@
+# @package _global_
+# ─────────────────────────────────────────────────────────────────────────────
+# EXPERIMENT: Late fusion baseline.
+#
+# Independent text/image encoders, pooled independently, then fused at the very
+# end for classification. No cross-modal interaction. This is the H1/H2
+# baseline — NOT a candidate architecture.
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  - /model/dcat.yaml
+  - /model/distilbert.yaml
+  - /model/mobilevit.yaml
+  - /data/dataset.yaml
+  - /training/base.yaml
+  - /router/thresholds.yaml
+  - _self_
+
+experiment_name: late_fusion
+fusions: late
+model:
+  dcat:
+    cross_attention:
+      layers: 0          # no cross-attention

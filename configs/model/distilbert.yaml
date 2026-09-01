@@ -1,0 +1,22 @@
+# @package model.distilbert
+# ─────────────────────────────────────────────────────────────────────────────
+# Text encoder — Hugging Face DistilBERT.
+#
+# The model returns token-level hidden states of shape [B, T, D_text]
+# (D_text = 768 for distilbert-base-uncased).
+# Padding/truncation behavior is explicit and configurable rather than implicit.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# HF model identifier.
+model_name: distilbert-base-uncased
+
+# Candidate initial configuration.
+max_length: 256
+
+# Truncation strategy for sequences longer than max_length.
+# Options: longest_first | only_first | only_second
+truncation: longest_first
+padding: max_length
+
+# Freeze this encoder during phase-1 training.
+freeze: true

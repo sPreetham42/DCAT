@@ -1,0 +1,21 @@
+# @package router
+# ─────────────────────────────────────────────────────────────────────────────
+# Modality router thresholds.
+#
+# These values are NOT scientifically frozen. They filter obvious tracking
+# pixels / decorative noise while preserving metadata about WHY an image was
+# filtered. They belong here so experiments can sweep them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Minimum image dimensions (pixels) for an image to count as meaningful.
+min_image_width: 20
+min_image_height: 20
+
+# Minimum encoded file size (bytes).
+min_image_bytes: 1024
+
+# Minimum visible-text length for an HTML body to count as having text.
+min_html_text_length: 10
+
+# Maximum pages/frames an image decoder may process defensively.
+max_image_pages: 32

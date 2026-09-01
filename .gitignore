@@ -1,0 +1,84 @@
+# ── Python ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+*.h5
+*.pkl
+*.pt
+*.pth.tar
+*.onnx
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# ── Testing & tooling ───────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+
+# ── IDE / OS ────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Project data (never commit raw/personal email data) ─────────────────
+data/raw/
+data/processed/
+data/interim/
+data/external/
+data/derived/
+*.parquet
+*.arrow
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Models & checkpoints ────────────────────────────────────────────────
+checkpoints/
+runs/
+mlruns/
+mlartifacts/
+.hydra/
+outputs/
+multirun/
+experiments/*.pt
+
+# ── DVC ─────────────────────────────────────────────────────────────────
+.dvc/
+*.dvc
+!data/.gitkeep
+
+# ── Environment / secrets ───────────────────────────────────────────────
+.env
+.env.*
+
+# Committed template (NOT a secret) — must remain tracked despite .env.*
+!.env.example
+*.local
+credentials.json
+secrets/
+wandb/
+
+# ── Logs ────────────────────────────────────────────────────────────────
+logs/
+*.log

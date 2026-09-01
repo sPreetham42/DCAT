@@ -1,0 +1,48 @@
+# @package training
+# ─────────────────────────────────────────────────────────────────────────────
+# Training — phase 2 (fine-tune encoders with lower learning rates).
+# ─────────────────────────────────────────────────────────────────────────────
+
+optimizer:
+  name: adamw
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+
+# Encoders fine-tuned at a lower learning rate.
+learning_rate:
+  encoders: 1.0e-5
+  new_layers: 1.0e-4
+
+scheduler:
+  name: cosine
+  warmup_steps: 100
+  min_lr: 1.0e-6
+
+# Fine-tuning is lighter on the learning-rate budget.
+amp: true
+grad_scaler: true
+
+batch_size: 12
+gradient_accumulation_steps: 4
+effective_batch_size: 48
+
+grad_clip_norm: 1.0
+
+max_epochs: 10
+early_stopping:
+  enabled: true
+  patience: 3
+  metric: val_loss
+  mode: min
+
+checkpoint:
+  dir: checkpoints
+  save_best: true
+  metric: val_f1
+  mode: max
+
+loss: BCEWithLogitsLoss
+
+num_workers: 2
+pin_memory: true

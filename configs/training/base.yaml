@@ -1,0 +1,56 @@
+# @package training
+# ─────────────────────────────────────────────────────────────────────────────
+# Training — base / phase 1 (encoders frozen).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Optimizer
+optimizer:
+  name: adamw
+  weight_decay: 0.01
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+
+# Learning rates — phase 1 trains ONLY the new layers.
+learning_rate:
+  encoders: 0.0           # frozen in phase 1
+  new_layers: 1.0e-4      # projections + cross-attention + classifier
+
+# Scheduler
+scheduler:
+  name: cosine
+  warmup_steps: 200
+  min_lr: 1.0e-6
+
+# Mixed precision
+amp: true
+grad_scaler: true
+
+# Batch / gradient accumulation
+batch_size: 16            # per-device
+gradient_accumulation_steps: 4
+effective_batch_size: 64  # = batch_size * gradient_accumulation_steps (log only)
+
+# Clipping
+grad_clip_norm: 1.0
+
+# Loop
+max_epochs: 20
+early_stopping:
+  enabled: true
+  patience: 5
+  metric: val_loss
+  mode: min
+
+# Checkpointing
+checkpoint:
+  dir: checkpoints
+  save_best: true
+  metric: val_f1
+  mode: max
+
+# Loss
+loss: BCEWithLogitsLoss
+
+# Determinism
+num_workers: 2
+pin_memory: true

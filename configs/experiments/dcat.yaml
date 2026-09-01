@@ -1,0 +1,35 @@
+# @package _global_
+# ─────────────────────────────────────────────────────────────────────────────
+# EXPERIMENT: DCAT dynamic routing (the candidate architecture).
+#
+# Conditional modality routing + bidirectional cross-attention. Missing
+# modality encoders are never invoked; no dummy evidence vectors; no 0.5
+# probability injection; one shared classifier after mean pooling.
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  - /model/dcat.yaml
+  - /model/distilbert.yaml
+  - /model/mobilevit.yaml
+  - /data/dataset.yaml
+  - /training/base.yaml
+  - /router/thresholds.yaml
+  - _self_
+
+experiment_name: dcat
+routing: conditional       # dynamic / conditional modality routing
+fusions: cross_attention
+model:
+  dcat:
+    shared_dim: 256
+    cross_attention:
+      layers: 2
+      heads: 4
+      d_model: 256
+      d_ff: 1024
+      dropout: 0.1
+      pre_norm: true
+    pooling: mean
+    classifier:
+      hidden_dim: 128
+      dropout: 0.3

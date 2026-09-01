@@ -1,0 +1,31 @@
+# @package _global_
+# ─────────────────────────────────────────────────────────────────────────────
+# Inference benchmarking.
+#
+# Used to measure latency, throughput, FLOPs, memory, and encoder-invocation
+# rate used in the H2 cost hypothesis. Runs are reproducible by seeding.
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  - /model/dcat.yaml
+  - /model/distilbert.yaml
+  - /model/mobilevit.yaml
+  - /data/dataset.yaml
+  - /router/thresholds.yaml
+  - _self_
+
+# Number of warmup / timed iterations for latency measurements.
+warmup_steps: 10
+bench_steps: 100
+
+# Modality mix used for the benchmark. If `null`, samples are drawn from the
+# actual validation-set modality distribution (recommended for H2).
+modality_mix: null
+
+batch_size: 1
+
+# Count of forward passes to attribute to each encoder when reporting FLOPs.
+count_missing_encoder: true
+
+# Export a machine-readable JSON artifact of all measured stats.
+output_artifact: artifacts/benchmark_inference.json

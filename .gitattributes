@@ -1,0 +1,13 @@
+# Normalize line endings on commit. Files are stored as LF in the repository;
+# checkouts on Windows get CRLF where appropriate.
+* text=auto
+
+# Binary assets are never subject to line-ending normalization.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.parquet binary
+*.pt binary
+*.onnx binary

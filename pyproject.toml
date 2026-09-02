@@ -74,6 +74,9 @@ serving = [
 
 [project.scripts]
 dcat-env = "dcat.scripts.env_check:main"
+dcat-validate = "dcat.scripts.validate_dataset:main"
+dcat-audit = "dcat.scripts.audit_leakage:main"
+dcat-explore = "dcat.scripts.explore_dataset:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

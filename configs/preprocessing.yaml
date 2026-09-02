@@ -1,0 +1,38 @@
+# @package preprocessing
+# ─────────────────────────────────────────────────────────────────────────────
+# Preprocessing limits (parser / image / html).
+#
+# These bounds protect the pipeline against uncontrolled resource use from
+# pathological emails (huge attachments, enormous HTML, many images) while
+# keeping preprocessing deterministic. They are configuration, not magic
+# numbers buried in code.
+# ─────────────────────────────────────────────────────────────────────────────
+
+parser:
+  # Hard cap on the total size of a raw .eml file (bytes). Files larger than
+  # this are rejected before any parsing happens.
+  max_message_bytes: 52428800        # 50 MiB
+
+  # Upper bound for a single MIME part's decoded payload (bytes). Parts that
+  # would exceed this are skipped and recorded in ParserOutput.errors.
+  max_part_bytes: 10485760           # 10 MiB
+
+  # Maximum number of image parts collected per email.
+  max_images: 32
+
+  # Maximum characters retained from a decoded text body.
+  max_text_chars: 1_000_000
+
+image:
+  # Same semantics as configs/router/thresholds.yaml, duplicated here for the
+  # image-preprocessing stage (kept in sync with the router thresholds).
+  min_image_width: 20
+  min_image_height: 20
+  min_image_bytes: 1024
+
+  # Target size for processed images fed to the vision encoder.
+  target_size: [224, 224]            # [height, width]
+
+html:
+  # Hard cap on raw HTML length processed by BeautifulSoup (characters).
+  max_html_chars: 2000000

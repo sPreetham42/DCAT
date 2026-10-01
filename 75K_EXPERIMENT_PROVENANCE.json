@@ -1,0 +1,248 @@
+{
+  "models": [
+    {
+      "model_name": "Full-DCAT",
+      "checkpoints": [
+        "checkpoints/full-dcat_best.pt",
+        "checkpoints/full-dcat_seed42_best.pt",
+        "checkpoints/full-dcat_seed43_best.pt",
+        "checkpoints/full-dcat_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/dcat.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9862398976066484,
+        "multimodal_macro_f1": 0.6253164471780516
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Evaluation matches 75K metrics exactly. Checkpoint architecture indicates CA layers=1, but config requests layers=2. No training run logs survive. Provenance is circumstantial but strongly correlated by exact metric match."
+    },
+    {
+      "model_name": "Late-Fusion",
+      "checkpoints": [
+        "checkpoints/late-fusion_best.pt",
+        "checkpoints/late-fusion_seed42_best.pt",
+        "checkpoints/late-fusion_seed43_best.pt",
+        "checkpoints/late-fusion_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/baseline.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9870589203765271,
+        "multimodal_macro_f1": 0.4967532467532468
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "Text-Only",
+      "checkpoints": [
+        "checkpoints/text-only_best.pt",
+        "checkpoints/text-only_seed42_best.pt",
+        "checkpoints/text-only_seed43_best.pt",
+        "checkpoints/text-only_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/baseline.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9827144828335745,
+        "multimodal_macro_f1": null
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "Image-Only",
+      "checkpoints": [
+        "checkpoints/image-only_best.pt",
+        "checkpoints/image-only_seed42_best.pt",
+        "checkpoints/image-only_seed43_best.pt",
+        "checkpoints/image-only_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/baseline.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.32204884868806405,
+        "multimodal_macro_f1": null
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "Published-Baseline",
+      "checkpoints": [
+        "checkpoints/published-baseline_seed42_best.pt",
+        "checkpoints/published-baseline_seed43_best.pt",
+        "checkpoints/published-baseline_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/baseline.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9868903000569887,
+        "multimodal_macro_f1": 0.4967532467532468
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "DCAT-No-Cross-Attention",
+      "checkpoints": [
+        "checkpoints/dcat-no-cross-attention_best.pt",
+        "checkpoints/dcat-no-cross-attention_seed42_best.pt",
+        "checkpoints/dcat-no-cross-attention_seed43_best.pt",
+        "checkpoints/dcat-no-cross-attention_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/dcat.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.986682752823758,
+        "multimodal_macro_f1": 0.592350138124786
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "DCAT-Early-Exit",
+      "checkpoints": [
+        "checkpoints/dcat-early-exit_seed42_best.pt",
+        "checkpoints/dcat-early-exit_seed42_best_fixed.pt",
+        "checkpoints/dcat-early-exit_seed43_best.pt",
+        "checkpoints/dcat-early-exit_seed44_best.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42, 43, 44],
+      "training_run": "UNKNOWN_OR_MISSING_LOGS",
+      "config_path": "configs/experiments/dcat.yaml",
+      "evaluation_artifact": "experiments/final_results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9866659903174502,
+        "multimodal_macro_f1": 0.4967532467532468
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["experiments/final_results.json"],
+      "notes": "Matches 75K expectations perfectly. Missing training run logs."
+    },
+    {
+      "model_name": "Weighted-DCAT",
+      "checkpoints": [
+        "checkpoints/dcat_weighted_primary.pt"
+      ],
+      "dataset_path": "data/processed",
+      "dataset_counts": {
+        "raw": 75419,
+        "usable": 73206,
+        "multimodal": 7867
+      },
+      "split": {
+        "train": 60335,
+        "val": 7542,
+        "test": 7542
+      },
+      "seed": [42],
+      "training_run": "scripts/weighted_primary.py",
+      "config_path": "configs/experiments/dcat.yaml",
+      "evaluation_artifact": "artifacts/weighted_primary/results.json",
+      "verified_metrics": {
+        "macro_f1": 0.9868,
+        "multimodal_macro_f1": 0.6824
+      },
+      "reuse_status": "RE-EVALUATE",
+      "evidence_paths": ["scripts/weighted_primary.py", "artifacts/final_results/results_lineage.csv"],
+      "notes": "Directly traced to the training script. However, independent verification of raw predictions in artifacts/weighted_cv/oof_predictions.json showed an F1 of 0.7782 instead of the reported 0.6824. Due to this severe mismatch, this model requires a full re-evaluation."
+    }
+  ]
+}

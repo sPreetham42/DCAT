@@ -1,0 +1,6 @@
+Model,Parameters,Trainable Parameters,Training Time,Device,Batch Size,Epochs,Learning Rate,Optimizer,Scheduler,Seed
+Text-only,71695521,395009,N/A,cuda,64,1,0.0001,AdamW,cosine,42
+Image-only,71695521,395009,N/A,cuda,64,1,0.0001,AdamW,cosine,42
+Late Fusion,71761314,460802,N/A,cuda,64,1,0.0001,AdamW,cosine,42
+DCAT-No-XAttn,71695521,395009,N/A,cuda,64,1,0.0001,AdamW,cosine,42
+DCAT,73276065,1975553,N/A,cuda,64,1,0.0001,AdamW,cosine,42

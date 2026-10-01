@@ -33,6 +33,15 @@ htmlcov/
 .mypy_cache/
 .tox/
 
+# ── Editor / tool scratch files ─────────────────────────────────────────
+.hypothesis/
+*.bak
+*.orig
+*.rej
+
+# ── Agent workspace metadata ────────────────────────────────────────────
+.freebuff/
+
 # ── IDE / OS ────────────────────────────────────────────────────────────
 .idea/
 .vscode/
@@ -47,6 +56,13 @@ data/processed/
 data/interim/
 data/external/
 data/derived/
+
+# SpamAssassin corpus: public tarball archives plus the extracted copies.
+# Re-downloaded on demand by scripts/profile_spamassassin.py — never commit.
+# (Authoritative derived data lives in data/manifests/ and data/experiments/,
+#  which are intentionally NOT ignored.)
+data/spamassassin/
+
 *.parquet
 *.arrow
 *.db
@@ -88,3 +104,6 @@ demo_ui/.vite/
 logs/
 *.log
 artifacts/
+
+# Large scratch files
+scratch/*.csv

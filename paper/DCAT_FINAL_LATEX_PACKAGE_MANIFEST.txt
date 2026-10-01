@@ -1,0 +1,23 @@
+DCAT FINAL LATEX PACKAGE MANIFEST
+
+Main LaTeX File: DCAT_FINAL_LATEX_PACKAGE/main.tex
+Bibliography File: DCAT_FINAL_LATEX_PACKAGE/references.bib
+Number of figures included: 0 (All figures are generated natively inline using TikZ/pgfplots vector code)
+Number of auxiliary source files: 0 (No external .sty, .cls, or input .tex files are required)
+
+--- FILE LIST ---
+
+Path: DCAT_FINAL_LATEX_PACKAGE/main.tex
+Type: LaTeX Source Document
+Size: 97213 bytes
+SHA256: ECEE42D3FD0036B18B84487E7097E2D3E9CAED358AB6602EA1A868C5392216E9
+
+Path: DCAT_FINAL_LATEX_PACKAGE/references.bib
+Type: BibTeX Database
+Size: 10285 bytes
+SHA256: 19FA56217D8556D3D6CF30B4A57D5F13D6DFE46912BA5D91F6B62E65127A7F60
+
+Path: DCAT_FINAL_LATEX_PACKAGE/README.md
+Type: Markdown Document
+Size: 807 bytes
+SHA256: 9348C692A1AFC480BD090D109AD006CCE40105213271B3F9926774E6F6CC89BD

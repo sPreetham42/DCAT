@@ -26,13 +26,13 @@ def main(args: list[str] | None = None) -> int:
     parser.add_argument(
         "--output-json",
         "-o",
-        default="artifacts/leakage_audit.json",
+        default="artifacts/leakage_audit/leakage_audit.json",
         help="Path to save machine-readable JSON leakage report",
     )
     parser.add_argument(
         "--output-md",
         "-m",
-        default="artifacts/leakage_audit.md",
+        default="artifacts/leakage_audit/leakage_audit.md",
         help="Path to save Markdown report suitable for MLflow artifacts",
     )
     opts = parser.parse_args(args)

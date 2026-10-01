@@ -1,0 +1,19 @@
+{
+  "train_count": 55744,
+  "validation_count": 7303,
+  "test_count": 10159,
+  "total_usable": 73206,
+  "overlap_errors": 0,
+  "group_leak_errors": 0,
+  "test_breakdown": {
+    "total_test": 10159,
+    "test_ham": 2488,
+    "test_spam": 7671,
+    "image_bearing_ham": 3,
+    "image_bearing_spam": 865,
+    "text_only_ham": 2485,
+    "text_only_spam": 6806,
+    "image_only": 156,
+    "multimodal": 712
+  }
+}

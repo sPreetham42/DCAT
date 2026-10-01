@@ -1,0 +1,512 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+%% PACKAGES
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{balance}
+\usepackage{enumitem}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+\title{\textbf{DCAT: Dynamic Cross-Attention Transformer for Conditional Multimodal Email Spam Detection}}
+
+\author{
+    \IEEEauthorblockN{Preetham S}
+    \IEEEauthorblockA{
+        Department of Information Science and Engineering \\
+        Dayananda Sagar College of Engineering, Bengaluru -- 560078, India \\
+        preetham.s@dsce.edu.in
+    }
+    \and
+    \IEEEauthorblockN{Guide: Dr. Prathima Mabel}
+    \IEEEauthorblockA{
+        Department of Information Science and Engineering \\
+        Dayananda Sagar College of Engineering, Bengaluru -- 560078, India
+    }
+}
+\maketitle
+
+\begin{abstract}
+Email spam represents a persistent security problem, and spam campaigns now increasingly use images in addition to text. This is a limitation for text-only filtering if relevant spam content is captured by images. Multimodal spam detection architectures typically process text and image modalities independently and fuse them at a late stage, and conventional multimodal pipelines may apply visual encoders even to inputs that have no meaningful image content. This paper proposes DCAT (Dynamic Cross-Attention Transformer), a conditional multimodal email spam detection architecture with two main components: bidirectional cross-attention between projected text and image representations, and deterministic modality routing with optional early-exit classification to avoid unnecessary vision computation.
+
+DCAT is evaluated on a naturally paired multimodal email corpus extracted from the SpamAssassin public dataset under deterministic modality routing, multi-seed evaluation, and explicit ablation studies. On the full test set, DCAT achieves Macro-F1 = 0.9862 from three seeds compared with 0.9869 for the published multimodal baseline reimplementation and 0.9871 for Late Fusion. On the multimodal test subset, Full-DCAT does not outperform Late Fusion (McNemar $p=1.0000$), while DCAT-No-XAttn achieves Macro-F1 = 0.8317 compared to 0.4968 for Full-DCAT. Five-fold cross-validation on the multimodal evaluation yields a mean MM-Macro-F1 of 0.7077 for Full-DCAT and 0.5453 for Late Fusion, with standard deviations of 0.2639 and 0.1222, respectively. Weighted-DCAT increases multimodal Macro-F1 from 0.6253 to 0.7478 in the class imbalance ablation, with pooled out-of-fold McNemar tests giving $p < 10^{-44}$ against unweighted Full-DCAT and $p < 10^{-5}$ against Late Fusion. The early-exit mechanism skips vision computation for 4.45\% of multimodal emails and reduces average FLOPs by 0.63\% on the evaluated test workload. Since 99.4\% of the corpus is text-only, the effect of multimodal computation on the full-test metric is limited. The results suggest that architectural changes alone cannot guarantee gains when multimodal training examples are extremely scarce and the corpus is strongly dominated by text-only messages.
+\end{abstract}
+\begin{IEEEkeywords}
+Multimodal spam detection, cross-attention, email classification, conditional computation, modality routing, DistilBERT, MobileViT, multimodal fusion, deep learning
+\end{IEEEkeywords}
+
+\section{Introduction}
+Email spam represents one of the main cybersecurity problems affecting individuals and organizations. Spam messages may contain promotional images, phishing screenshots, brand graphics, or other visual content in addition to text. In such messages, part of the information relevant to the spam decision can be captured within the image rather than in the textual content alone.
+Multimodal spam detection introduces a different set of conditions than conventional text classification. An email corpus can contain text-only messages, messages with both text and images, and a much smaller number of messages in which images provide most of the relevant content. A model that processes all available modalities for every message performs unnecessary visual computation for text-only inputs. At the same time, a model that learns cross-modal interactions needs enough paired examples for those interactions to be estimated reliably.
+Prior multimodal spam-detection systems have made use of separate text and image encoders followed by feature concatenation or other fusion mechanisms. Late-fusion approaches allow a direct way to combine modality-specific representations, though the encoders are independent till the fusion stage. Other approaches have explored intermediate fusion, attention-based fusion, and gating mechanisms. These approaches differ in where and how information is exchanged between modalities.
+DCAT uses bidirectional cross-attention to exchange information between text and image token representations before pooling. Text tokens attend to image representations, and image tokens attend to text representations. The architecture also uses deterministic modality routing so that text-only and image-only messages do not invoke unnecessary encoders. For multimodal messages, an optional early-exit classifier evaluates the text representation before the vision pathway is executed.
+The paper evaluates these design choices under a naturally paired email setting. The evaluation includes multi-seed results, ablations, analysis of performance on the much smaller multimodal subset, five-fold cross-validation, statistical comparisons across out-of-fold models, and efficiency measurements.
+The contributions of the paper are as follows:
+A conditional multimodal email spam detection architecture that combines bidirectional cross-attention with deterministic modality routing and optional early-exit computation.
+A controlled evaluation on naturally paired multimodal email data using three random seeds and explicit architectural and imbalance ablations.
+Analysis of the difference between performance on the full corpus and performance on the much smaller multimodal subset.
+An imbalance ablation comparing unweighted and class-weighted training.
+Efficiency measurements covering parameter counts, FLOPs, latency, and vision skip rate.
+
+\section{Background and Related Work}
+\subsection{Text-Based Spam Detection}
+Text-based spam detection has a long history of heuristic and machine-learning-based approaches. Early systems used rule-based techniques such as SpamAssassin~\cite{ref1}, which assign spam scores using predefined patterns and indicators. Traditional classifiers such as Naive Bayes, Support Vector Machines, and Random Forests~\cite{ref2} have also been applied to spam classification using bag-of-words and TF-IDF representations.
+Deep learning introduced learned feature extraction for text classification. Convolutional Neural Networks have been applied to character-level~\cite{ref19} and word-level~\cite{ref18} representations, while Long Short-Term Memory networks have been used to model sequential dependencies~\cite{ref20}. Transformer-based language models such as BERT~\cite{ref7}, RoBERTa~\cite{ref21}, and DistilBERT~\cite{ref4} provide contextual representations for text classification.
+DistilBERT~\cite{ref4} is a distilled version of BERT that reduces model size and inference cost while retaining much of the original model's language capability, making it suitable for experiments where text encoding is performed for large numbers of email messages.
+\subsection{Image-Based Spam Detection}
+Image-based spam detection considers messages in which images carry part of the content used to distinguish spam from legitimate email. Images can contain promotional material, screenshots, logos, or text rendered as graphics.
+CNN-based approaches have been applied to image spam detection to identify visual patterns such as colors, shapes, and text overlays~\cite{ref24}. Modern image encoders such as VGG~\cite{ref15}, ResNet~\cite{ref16}, and MobileNet~\cite{ref17} provide general-purpose visual feature extraction architectures that can be used as components of such systems.
+Image-only classification is subject to an additional limitation of being ambiguous without its associated email text. Legitimate messages may also contain visually similar objects, including company logos and marketing graphics.
+\subsection{Multimodal Spam Detection}
+Multimodal spam detection combines information from text and images. Standard late-fusion systems encode the two modalities separately and concatenate their representations prior to classification. The published MMTD framework~\cite{ref13}, for example, uses a text encoder and an image encoder followed by multimodal fusion.
+The MDL-SPAM framework~\cite{ref2} combines VGG-16 for image processing with LSTM-based text processing followed by fusion. Its methodology and data construction provide a basis for comparison with other multimodal spam-detection approaches.
+Other multimodal studies have explored attention-based and gating-based fusion mechanisms, where information from different modalities is combined through learned interaction. These approaches vary in the amount of cross-modal interaction that occurs before the final decision.
+For naturally occurring email corpora, multimodal examples can be much less common than text-only examples. This distribution affects both training and evaluation, as the multimodal subset may contain too few examples for reliable estimation of complex cross-modal interactions.
+\subsection{Cross-Attention in Multimodal Learning}
+Cross-attention mechanisms were originally developed from attention-based sequence-to-sequence models for machine translation~\cite{ref22} and later incorporated into vision-language architectures such as ViLBERT~\cite{ref8}, LXMERT~\cite{ref9}, and CLIP~\cite{ref10}. In a cross-attention operation, one representation supplies queries while the other supplies keys and values. The resulting attention weights determine which elements of the second representation contribute to each query representation.
+DCAT uses bidirectional cross-attention inspired by the co-attention structure employed in ViLBERT~\cite{ref8}. Text representations attend to image representations and image representations attend to text representations. This differs from late fusion, where the two modalities are processed independently until their pooled representations are combined.
+For email classification, this structure allows the representation of one modality to depend on the content of the other. A text feature may therefore have a different representation, depending on the associated image, and image features may similarly depend on the text.
+\subsection{Conditional Computation and Early Exit}
+Conditional computation changes the amount or structure of computation according to the input. An early-exit architecture provides an example of such a mechanism: an intermediate classifier can produce a prediction before the full network is executed~\cite{ref23}.
+In multimodal email classification, deterministic routing provides a simpler form of conditional computation. A text-only email does not require a vision encoder, while an image-only email does not require text encoding. For multimodal emails, DCAT can additionally use a text-only auxiliary classifier to determine whether the remaining multimodal computation is necessary.
+The early-exit path in DCAT is triggered when the auxiliary text classifier produces a probability of at least 0.95 or at most 0.05. Otherwise, the complete multimodal path is executed.
+\subsection{Evaluation Challenges in Multimodal Spam Detection}
+Multimodal evaluation can become challenging in the face of highly imbalanced modality distributions. A model may have a strong full-test metric while having limited performance on the much smaller multimodal subset. If the multimodal subset contains only a small number of samples, metrics such as F1 can vary substantially with a small number of prediction changes.
+The evaluation in this work therefore reports both full-test and multimodal-subset metrics and uses five-fold cross-validation for an additional multimodal analysis. McNemar's test is used for paired comparisons of model predictions.
+
+\section{Problem Formulation}
+\subsection{Task Definition}
+Given an email message $m$ with text content $t$ (email body, subject, and any extracted textual information) and optionally one or more images $\mathbf{I} = \{I_1, I_2, \ldots, I_K\}$ (embedded inline images or attachments), the task is to predict a binary label $y \in \{0,1\}$, where $y=0$ indicates legitimate email (ham) and $y=1$ indicates spam.
+\subsection{Modality Routing}
+Each email is deterministically assigned to one of four modality categories based on the content extracted during preprocessing:
+TEXT: meaningful text ($\geq 10$ characters after cleaning) is present, but no meaningful image passes the size and quality filters.
+IMAGE: at least one meaningful image is present, but no meaningful text is present.
+MULTIMODAL: both meaningful text and at least one meaningful image are present.
+EMPTY: neither meaningful text nor a meaningful image is present.
+The routing decision is determined by the Boolean flags $(has\_text, has\_image)$:
+\[
+\text{modality}(m) = \begin{cases} \text{MULTIMODAL}, & \text{if } has\_text \wedge has\_image,\\ \text{TEXT}, & \text{if } has\_text \wedge \neg has\_image,\\ \text{IMAGE}, & \text{if } \neg has\_text \wedge has\_image,\\ \text{EMPTY}, & \text{otherwise.} \end{cases}
+\]
+EMPTY emails are discarded from training and evaluation. The routing process is deterministic and does not employ a learned classifier, probability threshold, or learned heuristic.
+\subsection{Conditional Computation Path}
+DCAT implements three active computation paths:
+TEXT path: text encoder $\rightarrow$ projection $\rightarrow$ mean pooling $\rightarrow$ shared classifier. The vision encoder is not invoked.
+IMAGE path: image encoder $\rightarrow$ projection $\rightarrow$ mean pooling $\rightarrow$ shared classifier. The text encoder is not invoked.
+MULTIMODAL path: text encoder $\rightarrow$ projection $\rightarrow$ optional early exit via the text-only classifier $\rightarrow$ if not exited, image encoder $\rightarrow$ projection $\rightarrow$ bidirectional cross-attention $\rightarrow$ mean pooling $\rightarrow$ fusion $\rightarrow$ shared classifier.
+\subsection{Objective}
+The model is trained using binary cross-entropy:
+\[
+\mathcal{L} = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log \sigma(\hat{z}_i) + (1-y_i)\log(1-\sigma(\hat{z}_i)) \right]
+\]
+where $\hat{z}_i$ is the logit for email $i$, $\sigma$ is the sigmoid function, and $y_i$ is the ground-truth label.
+For Weighted-DCAT, the positive-class term is multiplied by $w_{pos}$:
+\[
+\mathcal{L}_{weighted} = -\frac{1}{N} \sum_{i=1}^{N} \left[ w_{pos}y_i \log \sigma(\hat{z}_i) + (1-y_i)\log(1-\sigma(\hat{z}_i)) \right].
+\]
+The positive-class weight is defined as:
+\[
+w_{pos} = \frac{N_{ham}}{N_{spam}}.
+\]
+This weighting compensates for the ham-dominant class distribution used during training.
+
+\section{Proposed DCAT Framework}
+\subsection{Architecture Overview}
+DCAT consists of five main components:
+\begin{enumerate}
+\item \textbf{Text Encoder} (DistilBERT): encodes email text into token-level contextual embeddings.
+\item \textbf{Vision Encoder} (MobileViT): encodes email images into spatial visual feature maps.
+\item \textbf{Modality Projector}: maps the two encoder outputs into a shared latent space of dimension $d_{model}$ using linear projections followed by Layer Normalization.
+\item \textbf{Bidirectional Cross-Attention}: exchanges information between text and image representations in the shared latent space.
+\item \textbf{Shared Classifier}: maps fused or unimodal representations to a spam/ham prediction.
+\end{enumerate}
+\subsection{Text Encoder}
+The text encoder uses DistilBERT-base-uncased~\cite{ref4}, a six-layer transformer with 768-dimensional hidden representations. Encoder parameters are frozen during training.
+The encoder produces token-level hidden states:
+\[
+\mathbf{H}_{text} = \text{DistilBERT}(\mathbf{x}_{text}).
+\]
+The tokenized input is truncated or padded to 256 tokens.
+\subsection{Vision Encoder}
+The vision encoder uses MobileViT-small~\cite{ref5}, accessed through the \texttt{timm} library~\cite{ref6}. Images are resized to $224 \times 224$ pixels before encoding.
+The encoder produces spatial feature representations:
+\[
+\mathbf{H}_{img} = \text{MobileViT}(\mathbf{x}_{img}).
+\]
+The vision encoder parameters are frozen during training.
+\subsection{Modality Projector}
+The projector maps text and image features into a shared $d_{model}$-dimensional latent space:
+\[
+\mathbf{Z}_{text} = \text{LayerNorm} \left( \mathbf{H}_{text}\mathbf{W}_{text} + \mathbf{b}_{text} \right)
+\]
+\[
+\mathbf{Z}_{img} = \text{LayerNorm} \left( \mathbf{H}_{img}\mathbf{W}_{img} + \mathbf{b}_{img} \right).
+\]
+The projection matrices have dimensions:
+\[
+\mathbf{W}_{text} \in \mathbb{R}^{768 \times d_{model}}
+\]
+and
+\[
+\mathbf{W}_{img} \in \mathbb{R}^{D_{img} \times d_{model}},
+\]
+with $d_{model} = 256$.
+\subsection{Bidirectional Cross-Attention}
+The cross-attention module consists of $L=2$ identical layers. Each layer performs information exchange in both directions.
+For text-to-image attention:
+\[
+\mathbf{Q}_{text} = \mathbf{Z}_{text}\mathbf{W}_{Q,text}, \quad \mathbf{K}_{img} = \mathbf{Z}_{img}\mathbf{W}_{K,img}, \quad \mathbf{V}_{img} = \mathbf{Z}_{img}\mathbf{W}_{V,img}.
+\]
+The attended text representation is:
+\[
+\mathbf{Z}_{img \rightarrow text} = \text{Softmax} \left( \frac{ \mathbf{Q}_{text} \mathbf{K}_{img}^{T} }{ \sqrt{d_k} } \right) \mathbf{V}_{img}.
+\]
+For image-to-text attention:
+\[
+\mathbf{Q}_{img} = \mathbf{Z}_{img}\mathbf{W}_{Q,img}, \quad \mathbf{K}_{text} = \mathbf{Z}_{text}\mathbf{W}_{K,text}, \quad \mathbf{V}_{text} = \mathbf{Z}_{text}\mathbf{W}_{V,text}.
+\]
+The two streams are updated with residual connections:
+\[
+\mathbf{Z}_{text}^{out} = \mathbf{Z}_{text} + \text{MLP}(\mathbf{Z}_{img \rightarrow text})
+\]
+\[
+\mathbf{Z}_{img}^{out} = \mathbf{Z}_{img} + \text{MLP}(\mathbf{Z}_{text \rightarrow img})
+\]
+The multi-head attention uses $h=4$ heads with per-head dimension $d_k = 64$.
+\subsection{Pooling and Fusion}
+Sequence-level representations are reduced by mean pooling.
+For the text representation: $\mathbf{z}_{text} = \text{MeanPool}(\mathbf{Z}_{text}).$
+For the image representation: $\mathbf{z}_{img} = \text{MeanPool}(\mathbf{Z}_{img}).$
+The multimodal representation is obtained by element-wise averaging from cross-attention:
+$\mathbf{z}_{fused} = \frac{ \mathbf{z}_{text}^{out} + \mathbf{z}_{img}^{out} }{2}.$
+\subsection{Shared Classifier}
+The classifier maps the $d_{model}$-dimensional representation to a single logit:
+$p(y=1|m) = \sigma \left( \text{MLP}_{cls}(\mathbf{H}_{fused}) \right).$
+For unimodal inputs, the corresponding pooled representation is passed to the same shared classifier.
+\subsection{Early-Exit Mechanism}
+For MULTIMODAL emails, DCAT optionally evaluates a text-only auxiliary classifier before invoking the vision encoder.
+The pooled text representation is passed to:
+$p_{aux}(y=1|t) = \sigma \left( \text{MLP}_{aux}(\mathbf{H}_{unimodal}) \right).$
+If $p_{aux} \geq 0.95$, the message is classified as spam from the text-only prediction.
+If $p_{aux} \leq 0.05$, the message is classified as ham from the text-only prediction.
+For values between the two thresholds, the complete multimodal pathway is executed.
+The auxiliary classifier is separate from the main shared classifier and is trained jointly with the model.
+\subsection{Training Procedure}
+The evaluated configuration uses:
+Optimizer: AdamW with learning rate $1 \times 10^{-4}$ and default weight decay.
+Scheduler: cosine annealing.
+Loss: Binary Cross-Entropy with Logits Loss, with optional positive-class weighting for Weighted-DCAT.
+Precision: FP16 mixed precision using PyTorch automatic mixed precision (AMP).
+Batch size: 64. Epochs: 1.
+Encoder freezing: DistilBERT and MobileViT are frozen; projection, cross-attention, and classifier parameters are trainable.
+Full-DCAT contains 73,309,090 total parameters, of which 2,008,578 are trainable (2.74\% of total).
+
+\section{Dataset and Data Processing}
+\subsection{Data Source}
+The evaluation corpus originates from the SpamAssassin public email corpus~\cite{ref1}. The processed subset used for primary evaluation contains 6,046 emails.
+\subsection{Preprocessing Pipeline}
+Stage 1: MIME Parsing. Each \texttt{.eml} file is parsed using Python's \texttt{email} package to extract plain text, HTML content, and image content.
+Stage 2: Content Filtering and Quality Control. Text is retained when at least 10 characters remain after whitespace stripping. Images must be at least $20 \times 20$ pixels and at least 1024 bytes. When multiple meaningful images are present, the largest image by byte size is selected.
+Stage 3: Image Processing. Selected images are resized to $224 \times 224$ pixels using bicubic interpolation, converted to RGB, and normalized for the MobileViT encoder.
+Stage 4: Text Tokenization. Email text is tokenized with the DistilBERT tokenizer using \texttt{max\_length = 256}, \texttt{truncation = longest\_first}, \texttt{padding = max\_length}.
+\subsection{Dataset Composition}
+The SpamAssassin subset contains 6,046 emails after preprocessing.
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{SpamAssassin Dataset Composition}
+\label{tab:1}
+\begin{tabular}{lcr}
+\toprule
+Property & Count & Percentage \\
+\midrule
+Total emails & 6,046 & 100.0\% \\
+Ham (legitimate) & 4,150 & 68.6\% \\
+Spam & 1,896 & 31.4\% \\
+TEXT & 6,007 & 99.4\% \\
+MULTIMODAL & 11 & 0.2\% \\
+IMAGE & 1 & 0.02\% \\
+EMPTY (excluded) & 27 & 0.4\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Text-only messages make up 99.4\% of the processed corpus, while only 11 of the 6,046 emails are classified as multimodal. The ham/spam distribution is 4,150 versus 1,896 messages, which is a 2.19:1 ham-to-spam ratio.
+\subsection{Split Strategy}
+The default split uses 70\% training, 15\% validation, and 15\% test data with a fixed random seed of 42. Stratification preserves the ham/spam class proportions across the splits.
+
+\section{Experimental Methodology}
+\subsection{Experimental Protocol}
+All primary experiments use three seeds: 42, 43, and 44. Reported primary metrics are the means across these runs.
+\subsection{Model Variants}
+Eight evaluated variants are included:
+All-Spam Prior, Modality Indicator, Text-only, Image-only, Late Fusion, DCAT-No-XAttn, Full-DCAT, and DCAT-Early-Exit.
+The published multimodal baseline is a reimplementation of a late-fusion architecture using DistilBERT for text and ResNet-18 for images.
+\subsection{Ablation Studies}
+The cross-attention ablation compares Late Fusion, DCAT-No-XAttn, and Full-DCAT on the multimodal subset.
+The imbalance ablation compares Full-DCAT trained with unweighted BCE against Weighted-DCAT.
+\subsection{Statistical Evaluation}
+Paired model comparisons use McNemar's test~\cite{ref11} with continuity correction, applied to both the multimodal test subset ($\sim$11 samples) and pooled out-of-fold predictions from five-fold cross-validation (7,867 samples).
+
+\section{Results}
+\subsection{Primary Benchmark: Full Test Set}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Primary Benchmark Results -- Full Test Set (3-Seed Mean)}
+\label{tab:2}
+\begin{tabular}{lccccc}
+\toprule
+Model & Macro-F1 & Ham F1 & Spam F1 & ROC-AUC & Acc. \\
+\midrule
+Text-Only & 0.9827 & 0.9760 & 0.9895 & 0.9953 & 0.9854 \\
+Pub.\ Baseline & 0.9869 & 0.9818 & 0.9920 & 0.9969 & 0.9889 \\
+Late Fusion & 0.9855 & 0.9798 & 0.9912 & 0.9966 & 0.9877 \\
+DCAT-No-XAttn & 0.9868 & 0.9817 & 0.9920 & 0.9970 & 0.9889 \\
+Full DCAT & 0.9862 & 0.9808 & 0.9916 & 0.9967 & 0.9883 \\
+DCAT-Early-Exit & 0.9862 & 0.9808 & 0.9916 & 0.9967 & 0.9883 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Full DCAT achieves Macro-F1 = 0.9862, while the Published Baseline achieves 0.9869 and Late Fusion achieves 0.9855. The difference between Full DCAT and Late Fusion is small on the full test set.
+
+\subsection{Multimodal Subset Analysis}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Multimodal Subset Results}
+\label{tab:3}
+\begin{tabular}{lccc}
+\toprule
+Model & Macro-F1 & Ham F1 & Spam F1 \\
+\midrule
+All-Spam Prior & 0.4968 & 0.0000 & 0.9935 \\
+Late Fusion & 0.4968 & 0.0000 & 0.9935 \\
+DCAT-No-XAttn & 0.8317 & 0.6667 & 0.9967 \\
+Full DCAT & 0.4968 & 0.0000 & 0.9935 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The multimodal subset contains very few samples. Late Fusion, Full DCAT, and the All-Spam Prior all have Macro-F1 = 0.4968 with Ham F1 = 0.0000. DCAT-No-XAttn is the exception, with Macro-F1 = 0.8317 and Ham F1 = 0.6667.
+
+\subsection{Cross-Attention Ablation}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Cross-Attention Ablation (Multimodal Subset)}
+\label{tab:4}
+\begin{tabular}{lccc}
+\toprule
+Model & Macro-F1 & Ham F1 & Spam F1 \\
+\midrule
+Late Fusion & 0.4968 & 0.0000 & 0.9935 \\
+DCAT-No-XAttn & 0.8317 & 0.6667 & 0.9967 \\
+Full DCAT & 0.4968 & 0.0000 & 0.9935 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+McNemar's test gives $p=1.0000$ for Full DCAT versus Late Fusion, and $p=0.2482$ for Full DCAT versus DCAT-No-XAttn.
+
+\subsection{Class Imbalance Ablation}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Class Imbalance Ablation}
+\label{tab:5}
+\begin{tabular}{lcccc}
+\toprule
+Model & Macro-F1 & Spam F1 & Ham F1 & MM-Macro-F1 \\
+\midrule
+Full DCAT & 0.9862 & 0.9916 & 0.9809 & 0.6253 \\
+Weighted Full DCAT & 0.9880 & 0.9927 & 0.9833 & 0.7478 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Weighted-DCAT increases multimodal Macro-F1 from 0.6253 to 0.7478. The pooled out-of-fold McNemar comparisons give $p = 2.49 \times 10^{-45}$ for Weighted-DCAT versus Full-DCAT.
+
+\subsection{Multimodal Robustness: 5-Fold Cross-Validation}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Multimodal Robustness (5-Fold CV)}
+\label{tab:6}
+\begin{tabular}{lcc}
+\toprule
+Model & MM-Macro-F1 (Mean) & MM-Macro-F1 (Std) \\
+\midrule
+DCAT-No-XAttn & 0.5171 & 0.0597 \\
+Full DCAT & 0.7077 & 0.2639 \\
+Late Fusion & 0.5453 & 0.1222 \\
+Published Baseline & 0.5564 & 0.1192 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Per-Fold Cross-Validation Details}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Per-Fold MM-Macro-F1 from 5-Fold CV}
+\label{tab:7}
+\begin{tabular}{lccc}
+\toprule
+Fold & Late Fusion & DCAT-No-XAttn & Full DCAT \\
+\midrule
+1 & 0.4971 & 0.6647 & 0.4971 \\
+2 & 0.4971 & 0.6647 & 0.4971 \\
+3 & 0.4968 & 0.6644 & 0.4968 \\
+4 & 0.7380 & 0.5451 & 1.0000 \\
+5 & 0.4975 & 0.6531 & 1.0000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Efficiency Analysis}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Efficiency Comparison}
+\label{tab:8}
+\begin{tabular}{lcccc}
+\toprule
+Model & Params & Trainable & FLOPs & Lat.\ (ms) \\
+\midrule
+Published Baseline & 77.9M & 428K & $\sim$13B & 1.48 \\
+Late Fusion & 71.7M & 461K & $\sim$13B & 2.65 \\
+Full DCAT & 73.3M & 2.01M & $\sim$13B & 2.70 \\
+DCAT-Early-Exit & 73.3M & 2.01M & $\sim$11B (avg) & 2.68 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Early-Exit Efficiency Details (Full Test Set)}
+\label{tab:9}
+\begin{tabular}{lccc}
+\toprule
+Metric & Full DCAT & DCAT-Early-Exit & Diff \\
+\midrule
+Total Latency & 59.9 ms & 74.7 ms & +24.82\% \\
+P95 Latency & 60.3 ms & 113.6 ms & +88.39\% \\
+Total FLOPs & 12.8M & 12.7M & $-$0.63\% \\
+Vision Skip Rate & 0.00\% & 4.45\% & +4.45\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The vision skip rate is 4.45\%, and the corresponding average FLOP reduction is 0.63\%. The total-time measurement shows an increase of 24.82\% for the early-exit variant, while the per-sample measurement in Table~\ref{tab:8} changes from 2.70 ms to 2.68 ms. These values come from different measurement procedures.
+
+\subsection{Seed Variance Analysis}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{3-Seed Macro-F1 Variance}
+\label{tab:10}
+\begin{tabular}{lccccc}
+\toprule
+Model & Seed 42 & Seed 43 & Seed 44 & Mean & Std \\
+\midrule
+Published Baseline & 0.9870 & 0.9865 & 0.9871 & 0.9869 & 0.0003 \\
+Late Fusion & 0.9868 & 0.9869 & 0.9875 & 0.9871 & 0.0003 \\
+Full DCAT & 0.9860 & 0.9863 & 0.9864 & 0.9862 & 0.0002 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Modality-Specific Performance Analysis}
+
+\begin{table}[htbp]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\caption{Modality-Specific Macro-F1 (Full Test Set, Seed 42)}
+\label{tab:11}
+\begin{tabular}{lcc}
+\toprule
+Model & Text-Only & Multimodal \\
+\midrule
+Late Fusion & 0.9858 & 0.4968 \\
+DCAT-No-XAttn & 0.9871 & 0.8317 \\
+Full DCAT & 0.9865 & 0.4968 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+\subsection{Full-Test Performance and Cross-Attention}
+Full DCAT achieves Macro-F1 = 0.9862 on the full test set, compared with 0.9871 for Late Fusion in the three-seed analysis. The difference is small. The corpus is 99.4\% text-only, so the cross-attention module is not used for most examples. The multimodal subset contains only 11 emails, providing limited training signal for estimating cross-modal interactions.
+\subsection{Text-Dominated Corpus}
+Text-only classification remains strong in this corpus, with Macro-F1 = 0.9827. The full-test results for the multimodal models remain within a narrow range despite the additional visual pathway. The result should not be generalized to email corpora with substantially higher proportions of image-containing messages.
+\subsection{Effect of Class Weighting}
+Weighted-DCAT increases multimodal Macro-F1 from 0.6253 to 0.7478 and changes the full-test Macro-F1 from 0.9862 to 0.9880. The pooled out-of-fold McNemar comparisons are statistically significant. The result isolates a training-objective effect: changing the class weighting changes the predictions substantially on the pooled evaluation.
+\subsection{Efficiency Trade-offs}
+The early-exit mechanism skips the vision encoder for 4.45\% of the multimodal cases in the evaluated workload. Because only a small fraction of the corpus is multimodal, the resulting average FLOP reduction is 0.63\%. The total-time measurement shows that conditional execution overhead can outweigh the computational saving under this workload.
+\subsection{Comparison to Prior Work}
+The Published Baseline reaches Macro-F1 = 0.9869 in the full-test evaluation, compared with 0.9862 for Full DCAT. The full-test results do not show an advantage for cross-attention over the published late-fusion baseline under the evaluated corpus and protocol.
+
+\section{Limitations and Threats to Validity}
+\subsection{Dataset Limitations}
+Extreme multimodal scarcity: only 11 emails in the primary SpamAssassin subset are multimodal. Single corpus: all experiments use the SpamAssassin corpus. No OCR: the pipeline does not extract text rendered inside images.
+\subsection{Architecture Limitations}
+Frozen encoders, simple fusion strategy, and fixed early-exit thresholds.
+\subsection{Evaluation Limitations}
+Small multimodal test set, single training epoch, no adversarial evaluation, and efficiency measurement uncertainty.
+
+\section{Conclusion and Future Work}
+This paper presents DCAT, a conditional multimodal email spam detection architecture combining bidirectional cross-attention, deterministic modality routing, and optional early-exit computation.
+On the full test set, Full DCAT achieves Macro-F1 = 0.9862, compared with 0.9869 for the Published Baseline and 0.9871 for Late Fusion. The full-test differences are small and the corpus is dominated by text-only messages.
+Weighted training changes the multimodal result more substantially than the cross-attention ablation. Weighted-DCAT increases multimodal Macro-F1 from 0.6253 to 0.7478, with statistically significant pooled out-of-fold McNemar comparisons against both Full DCAT and Late Fusion.
+The early-exit mechanism skips vision computation for 4.45\% of multimodal cases and reduces average FLOPs by 0.63\%, but the total-time measurement reports a 24.82\% latency increase, suggesting that the measured runtime effect depends on execution overhead as well as theoretical FLOP savings.
+Overall, the experiments do not demonstrate a consistent full-test advantage from adding cross-attention and show that the multimodal results are highly sensitive to data distribution, class imbalance, and the size of the multimodal subset.
+
+\subsection{Future Work}
+\begin{enumerate}
+\item Corpus expansion: evaluate DCAT on larger datasets with substantially more multimodal emails.
+\item OCR integration: extract text embedded inside images.
+\item Encoder fine-tuning: evaluate partial or full fine-tuning of DistilBERT and MobileViT.
+\item Multi-image support: process multiple meaningful images per email.
+\item Learned routing: replace deterministic routing with a learned mechanism.
+\item Contrastive pre-training: train projection and cross-attention components using paired text-image representations.
+\item Larger-scale efficiency analysis: evaluate early-exit behavior on corpora with higher multimodal prevalence.
+\end{enumerate}
+
+\balance
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,references}
+
+\end{document}

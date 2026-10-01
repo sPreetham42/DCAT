@@ -67,6 +67,20 @@ Do not redesign these unless a genuine correctness problem is found:
 
 ```
 dcat/
+├── README.md
+├── pyproject.toml
+├── requirements.lock.txt
+├── run_*.ps1           # reproduction runbook (evaluation pipeline)
+│
+├── src/dcat/           # THE METHOD — core package
+│   ├── data/           # data contract, dataset, DVC, leakage audit
+│   ├── preprocessing/  # MIME parser, HTML, image, modality router
+│   ├── models/         # encoders, projection, cross-attention, classifier, DCAT
+│   ├── training/       # trainer, experiment runner
+│   ├── evaluation/     # metrics
+│   ├── inference/      # inference pipeline
+│   └── scripts/        # CLI entry points (env check, dataset validation, etc.)
+├── tests/              # pytest suites (unit, tensor-shape, integration)
 ├── configs/            # Hydra configuration
 │   ├── config.yaml     # root config (composition)
 │   ├── model/          # dcat, distilbert, mobilevit
@@ -75,19 +89,30 @@ dcat/
 │   ├── experiments/    # late_fusion, early_fusion, cross_attention, dcat
 │   ├── benchmark/      # inference
 │   └── router/         # modality thresholds
-├── src/dcat/           # core package
-│   ├── data/           # data contract, datasets, DVC, leakage audit
-│   ├── preprocessing/  # MIME parser, HTML, image, modality router
-│   ├── models/         # encoders, projection, cross-attention, classifier, DCAT
-│   ├── training/       # trainers, optimizers, schedulers, seed manager
-│   ├── evaluation/     # metrics, baselines, benchmarking
-│   ├── inference/      # inference pipeline
-│   └── scripts/        # CLI entry points (env check, dataset validation, etc.)
-├── tests/              # pytest suites (unit, tensor-shape, integration)
-├── scripts/            # standalone runnable scripts
-├── data/               # raw/processed data (gitignored)
-├── notebooks/          # exploration notebooks
-└── docs/               # research notes and docs
+├── scripts/            # data pipeline + evaluation/analysis scripts
+├── experiments/        # authoritative experiment metadata (final_results.json)
+├── results/            # AUTHORITATIVE RESULTS
+│   ├── tables/         # result tables (CSV / Markdown)
+│   ├── figures/        # figures included by paper/main.tex
+│   └── final_report.md
+├── artifacts/          # raw per-analysis evidence
+│   ├── final_results/  # compiled summary, result table, results lineage
+│   ├── leakage_audit/  # leakage audit report
+│   ├── error_analysis/ # per-model error dumps
+│   ├── weighted_cv/  weighted_primary/  multimodal_cv/
+│   └── imbalance_ablation/  efficiency/
+├── paper/              # manuscript (main.tex, references.bib)
+├── docs/               # research notes and docs
+├── demo_ui/            # interactive demo prototype
+├── outputs/            # Hydra run provenance (pilot runs)
+│
+├── data/
+│   ├── manifests/      # split + provenance manifests
+│   ├── raw/            # 16 GB raw corpus        (local only, gitignored)
+│   ├── processed/      # email_origin.csv, records.parquet (local only, gitignored)
+│   └── spamassassin/   # public corpus            (local only, gitignored)
+├── checkpoints/        # trained weights, ~7.9 GB (local only, gitignored)
+└── .venv/              # local environment        (local only, gitignored)
 ```
 
 ---

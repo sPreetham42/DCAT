@@ -1,0 +1,22 @@
+Model,Modality,Macro-F1,Accuracy
+All-Spam Prior,text,0.4022,0.6728
+All-Spam Prior,image,1.0000,1.0000
+All-Spam Prior,multimodal,0.4968,0.9871
+Modality Indicator,text,0.4022,0.6728
+Modality Indicator,image,1.0000,1.0000
+Modality Indicator,multimodal,0.4968,0.9871
+Text-only,text,0.9864,0.9881
+Text-only,image,0.0500,0.0526
+Text-only,multimodal,0.5584,0.9118
+Image-only,text,0.4307,0.6534
+Image-only,image,1.0000,1.0000
+Image-only,multimodal,0.4968,0.9871
+Late Fusion,text,0.9876,0.9891
+Late Fusion,image,1.0000,1.0000
+Late Fusion,multimodal,0.4968,0.9871
+DCAT-No-XAttn,text,0.9879,0.9894
+DCAT-No-XAttn,image,1.0000,1.0000
+DCAT-No-XAttn,multimodal,0.8317,0.9935
+DCAT,text,0.9871,0.9886
+DCAT,image,1.0000,1.0000
+DCAT,multimodal,0.4968,0.9871

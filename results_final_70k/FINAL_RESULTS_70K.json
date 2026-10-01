@@ -1,0 +1,124 @@
+{
+  "dataset_statistics": {
+    "total_records": 75419,
+    "usable_records": 73206,
+    "splits": {
+      "train": 60335,
+      "val": 7542,
+      "test": 7542
+    },
+    "class_distribution": {
+      "spam": 50199,
+      "ham": 25220
+    },
+    "modality_distribution": {
+      "text_only": 63772,
+      "multimodal": 7867,
+      "image_only": 1567,
+      "empty": 2213
+    }
+  },
+  "model_configurations": [
+    "Text-Only",
+    "Image-Only",
+    "Published-Baseline",
+    "Late-Fusion",
+    "DCAT-No-Cross-Attention",
+    "Full-DCAT",
+    "DCAT-Early-Exit"
+  ],
+  "primary_results": {
+    "Text-Only": {
+      "macro_f1": 0.9827144828335745,
+      "spam_f1": 0.9894683847493818,
+      "ham_f1": 0.9759605809177669,
+      "accuracy": 0.9853534666485285
+    },
+    "Image-Only": {
+      "macro_f1": 0.32204884868806405,
+      "spam_f1": 0.15398114085231898,
+      "ham_f1": 0.4901165565238091,
+      "accuracy": 0.3637146873441255
+    },
+    "Published-Baseline": {
+      "macro_f1": 0.9868903000569887,
+      "spam_f1": 0.9920109072889409,
+      "ham_f1": 0.9817696928250365,
+      "accuracy": 0.9888904003990387
+    },
+    "Late-Fusion": {
+      "macro_f1": 0.9870589203765271,
+      "spam_f1": 0.9921048852156814,
+      "ham_f1": 0.9820129555373729,
+      "accuracy": 0.9890264363125199
+    },
+    "DCAT-No-Cross-Attention": {
+      "macro_f1": 0.986682752823758,
+      "spam_f1": 0.9918773710994994,
+      "ham_f1": 0.9814881345480163,
+      "accuracy": 0.9887090191810639
+    },
+    "Full-DCAT": {
+      "macro_f1": 0.9862398976066484,
+      "spam_f1": 0.9916235081605729,
+      "ham_f1": 0.980856287052724,
+      "accuracy": 0.988346256745114
+    },
+    "DCAT-Early-Exit": {
+      "macro_f1": 0.9866659903174502,
+      "spam_f1": 0.9918853310785055,
+      "ham_f1": 0.9814466495563948,
+      "accuracy": 0.9887090191810639
+    }
+  },
+  "modality_results": {
+    "Text-Only": {
+      "text_only_macro_f1": 0.9827144828335745,
+      "multimodal_macro_f1": 0,
+      "image_only_macro_f1": 0
+    },
+    "Image-Only": {
+      "text_only_macro_f1": 0,
+      "multimodal_macro_f1": 0,
+      "image_only_macro_f1": 0.32204884868806405
+    },
+    "Published-Baseline": {
+      "text_only_macro_f1": 0.9874576573285441,
+      "multimodal_macro_f1": 0.4967532467532468,
+      "image_only_macro_f1": 1.0
+    },
+    "Late-Fusion": {
+      "text_only_macro_f1": 0.9876305404817559,
+      "multimodal_macro_f1": 0.4967532467532468,
+      "image_only_macro_f1": 1.0
+    },
+    "DCAT-No-Cross-Attention": {
+      "text_only_macro_f1": 0.9871856705588157,
+      "multimodal_macro_f1": 0.592350138124786,
+      "image_only_macro_f1": 0.8288288288288288
+    },
+    "Full-DCAT": {
+      "text_only_macro_f1": 0.9867843278374516,
+      "multimodal_macro_f1": 0.6253164471780516,
+      "image_only_macro_f1": 1.0
+    },
+    "DCAT-Early-Exit": {
+      "text_only_macro_f1": 0.9872275617894597,
+      "multimodal_macro_f1": 0.4967532467532468,
+      "image_only_macro_f1": 1.0
+    }
+  },
+  "ablations": {},
+  "efficiency": {
+    "DCAT-Early-Exit": {
+      "latency_reduction": "24.82%",
+      "early_exit_skip_rate": "4.45%",
+      "flops_reduction": "0.63%"
+    }
+  },
+  "provenance": {
+    "dataset": "data/processed",
+    "leakage_audit": "Sampled TF-IDF showed 63.4% near-duplicate leakage at 0.90 threshold",
+    "checkpoints": "checkpoints/"
+  }
+}

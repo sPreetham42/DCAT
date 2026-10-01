@@ -1,0 +1,37 @@
+--- Dataset: data/raw (Email Corpus) ---
+1. Exact path: C:\Users\Preetham S\Documents\antigravity projects\dcat\data\raw
+2. File type: EML / Raw MIME
+3. Number of files: 6971
+4. Label structure: Labels might be in a processed file or filenames. Let's assume this is just raw data without explicit labels unless matched with email_origin.csv.
+5. Contains raw MIME emails: Yes
+6. Images embedded: Will check if 'image/' in content.
+7. Spam and Ham both present: Needs cross-referencing with labels.
+8. Image file formats and counts: N/A (these are emails, embedded images aren't extracted here)
+9. Duplicates: 174 files
+10. Can be used for text-only training: Yes
+10. Can be used for image-only training: No (unless extracted)
+10. Can be used for paired multimodal training: Only if images are extracted and present.
+
+--- Dataset: data/raw/image_spam_public.json (Image Spam Hunter) ---
+1. Exact path: C:\Users\Preetham S\Documents\antigravity projects\dcat\data\raw\image_spam_public.json
+2. File type: JSON (metadata) + associated image files?
+Error parsing Image Spam Hunter: 
+
+--- Dataset: data/processed/records.parquet ---
+1. Exact path: C:\Users\Preetham S\Documents\antigravity projects\dcat\data\processed\records.parquet
+2. File type: Parquet
+3. Number of records: 75419
+4. Label structure: 'label' column. Values: {1: 50199, 0: 25220}
+5. Raw MIME or text: Columns are ['email_id', 'label', 'subject', 'text', 'html', 'images_json', 'has_text', 'has_meaningful_image', 'modality', 'sender_hash', 'campaign_id', 'split']. Contains text/html.
+6. Embedded images: 'has_meaningful_image' column exists? True
+7. Spam and Ham present: Yes
+8. Image formats/counts: N/A (this is metadata/text)
+
+--- Dataset: data/processed/email_origin.csv ---
+1. Exact path: C:\Users\Preetham S\Documents\antigravity projects\dcat\data\processed\email_origin.csv
+2. File type: CSV
+3. Number of records: Reading via chunks...
+3. Number of records: 75419
+4. Label structure: 'label' column. Spam: 50199, Ham: 25220
+5. Raw MIME or text: Contains 'origin' column which holds raw MIME.
+7. Spam and Ham present: Yes (50199 spam, 25220 ham)

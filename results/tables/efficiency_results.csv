@@ -1,0 +1,5 @@
+Model,Params,Trainable Params,FLOPs,Latency/sample (ms)
+Published Baseline,77967426,428034,~ 13B,1.48
+Late Fusion,71761314,460802,~ 13B,2.65
+DCAT,73309090,2008578,~ 13B,2.70
+DCAT + Early Exit,73309090,2008578,"~ 11B (avg, 90% text-only)",2.68
